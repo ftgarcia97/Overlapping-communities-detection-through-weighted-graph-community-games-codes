@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar  9 13:12:06 2022
-
-@author: 34625
-"""
-
-
 from scipy import stats
 import math
 
