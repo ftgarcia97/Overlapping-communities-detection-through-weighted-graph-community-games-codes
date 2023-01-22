@@ -8,6 +8,7 @@ import random
 import networkx as nx
 import math
 
+##  Overlapping LFR benchmark generator algorithm
 def Overlapping_LFR_benchmark_generator(N,N_o,k_min,k_max,s_min,s_max,gamma,beta,mu,mu_o,p,nc):
     degrees={}
     nodes=range(1,N+1)
@@ -110,6 +111,10 @@ def Overlapping_LFR_benchmark_generator(N,N_o,k_min,k_max,s_min,s_max,gamma,beta
     edges=edges+[(nodes[i],nodes[j]) for (i,j) in random_graph.edges()]
     for i in nodes:
         if(degrees[i]!=len([1 for (j1,j2) in edges if(i==j1)])+len([1 for (j1,j2) in edges if(i==j2)])):
-            print("ERRRRROOOOOOOOOOOOOOOOR",i)
+            print("ERROR",i)
+    for s in range(1,nc+1):
+        for i in list(S[s]):
+            if(internal_degrees[i,s]>len([1 for (j1,j2) in edges if(i==j1 and j2 in list(S[s]))])+len([1 for (j1,j2) in edges if(i==j2 and j1 in list(S[s]))])):
+                print("ERROR",i,s)
     return edges,nc,S,bridge_nodes
     

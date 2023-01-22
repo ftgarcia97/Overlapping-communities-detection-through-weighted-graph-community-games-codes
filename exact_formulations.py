@@ -137,6 +137,12 @@ def F_ShMod(W,nodes,nc,p):
     # Return objective value and final partition
     return m_ShMod.objVal,partition
 
+## Generator of stable partitions
+## W: Weights - Expected Weights
+## nodes: Set of nodes
+## nc: Maximum number of communities
+## p: Maximum number of communities to which a node can belong to
+## banned_partitions: Previous initial partitions are banned to be not repeated
 def find_stable_partition(W,nodes,nc,p,banned_partitions):
     
     m_stable = gp.Model("model stable")

@@ -6,7 +6,7 @@ from exact_formulations import find_stable_partition
     ## nodes: Set of nodes
     ## nc: Maximum number of communities
     ## p: Maximum number of communities to which a node can belong to
-    ## banned_partitions: Previous initial partitions are banned to be not repeated
+    ## banned_partitions: Previous initial partitions are banned to be not repeated and obtain new 
 def LSE_heuristic(nodes,edges,W,nc,p,banned_partitions):
     adjacent_degree={}
     for i in nodes:
@@ -94,6 +94,8 @@ def LSE_heuristic(nodes,edges,W,nc,p,banned_partitions):
                                 S[s]=list(set(S[s]+[i])-{j})
                                 S[r]=list(set(S[r]+[j])-{i})
                                 delta[i,s,j,r,d]=sum([W[i,k] for k in S[r] if(len(set(C[i]) & set(C[k]))==0 and k!=j)])+sum([W[j,k] for k in S[s] if(len(set(C[j]) & set(C[k]))==0 and k!=i)])-sum([W[i,k] for k in S[s] if(len(set(C[i]) & set(C[k]))==1 and k!=i and k not in S[r])])-sum([W[j,k]for k in S[r] if(len(set(C[k]) & set(C[j]))==1 and k!=j and k not in S[s])])   
+            
+            ## Find the best movement
             if(len(stable_moves)>0):
                 delta_stable={}
                 for t in stable_moves:
@@ -196,7 +198,7 @@ def LSE_heuristic(nodes,edges,W,nc,p,banned_partitions):
                             else:
                                 delta[i,s,j,r,d]=0
 
-
+        ## Find the best movement
         arg_max=max(delta, key=delta.get)
         if(len(arg_max)==3):
             node_max,com_max,d_max=arg_max
