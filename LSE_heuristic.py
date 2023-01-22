@@ -6,22 +6,24 @@ from exact_formulations import find_stable_partition,F_ShMod,find_stable_partiti
     ## nodes: Set of nodes
     ## nc: Maximum number of communities
     ## p: Maximum number of communities to which a node can belong to
+    ## banned_partitions: Previous initial partitions are banned to be not repeated
 def LSE_heuristic(nodes,edges,W,nc,p,banned_partitions):
     adjacent_degree={}
     for i in nodes:
         adjacent_degree[i]=len([(j,k) for (j,k) in edges if(j==i or k==i)]) 
     stability=False
     while(stability==False):
-        ## Random initial partition
+        
+        ## Initial partition: Random partition or use mathematical programming model to obtain a stable partition
         # initial_partition=random_partition(nodes,nc)
         initial_sol,initial_partition=find_stable_partition(W,nodes,nc,p,banned_partitions)
-        # initial_partition=find_stable_partition3(W,nodes,nc,p,banned_partitions)
-        # obj_val1,initial_partition=F_ShMod(W,nodes,nc,p)
+        
         ## S[k]: Set of nodes that belong to community k
         S={}
         
         ## C[i]: Index Set of the communities to which i belongs
         C={}
+        
         for i in nodes:
             C[i]=[]
         for k in range(1,nc+1):
@@ -36,7 +38,6 @@ def LSE_heuristic(nodes,edges,W,nc,p,banned_partitions):
         ## Initialize FeasibleMoves set
         moves=[]
         stability=is_stable(nodes,W,S,nc)
-        # print(stability,initial_partition)
         while(delta_max>1.e-10 and stability==False):
             
             ## The initial partition is not stable so we have to find first an stable one
@@ -79,20 +80,20 @@ def LSE_heuristic(nodes,edges,W,nc,p,banned_partitions):
                         delta[i,s,d]=0
             
             ## Swap movement
-            # d=3
-            # for i in nodes:
-            #     for j in nodes:
-            #         if(i<j):
-            #             for s in (set(C[i])-set(C[j])) & set(no_stable_communities):
-            #                 for r in (set(C[j])-set(C[i])) & set(no_stable_communities):
-            #                     S[s]=list(set(S[s]+[j])-{i})
-            #                     S[r]=list(set(S[r]+[i])-{j})
-            #                     if(no_stable_communities==[i] or no_stable_communities==[j] or no_stable_communities==[i,j]):
-            #                         if(is_stable(nodes,W,S,nc)):
-            #                             stable_moves.append((i,s,j,r,d))
-            #                     S[s]=list(set(S[s]+[i])-{j})
-            #                     S[r]=list(set(S[r]+[j])-{i})
-            #                     delta[i,s,j,r,d]=sum([W[i,k] for k in S[r] if(len(set(C[i]) & set(C[k]))==0 and k!=j)])+sum([W[j,k] for k in S[s] if(len(set(C[j]) & set(C[k]))==0 and k!=i)])-sum([W[i,k] for k in S[s] if(len(set(C[i]) & set(C[k]))==1 and k!=i and k not in S[r])])-sum([W[j,k]for k in S[r] if(len(set(C[k]) & set(C[j]))==1 and k!=j and k not in S[s])])   
+            d=3
+            for i in nodes:
+                for j in nodes:
+                    if(i<j):
+                        for s in (set(C[i])-set(C[j])) & set(no_stable_communities):
+                            for r in (set(C[j])-set(C[i])) & set(no_stable_communities):
+                                S[s]=list(set(S[s]+[j])-{i})
+                                S[r]=list(set(S[r]+[i])-{j})
+                                if(no_stable_communities==[i] or no_stable_communities==[j] or no_stable_communities==[i,j]):
+                                    if(is_stable(nodes,W,S,nc)):
+                                        stable_moves.append((i,s,j,r,d))
+                                S[s]=list(set(S[s]+[i])-{j})
+                                S[r]=list(set(S[r]+[j])-{i})
+                                delta[i,s,j,r,d]=sum([W[i,k] for k in S[r] if(len(set(C[i]) & set(C[k]))==0 and k!=j)])+sum([W[j,k] for k in S[s] if(len(set(C[j]) & set(C[k]))==0 and k!=i)])-sum([W[i,k] for k in S[s] if(len(set(C[i]) & set(C[k]))==1 and k!=i and k not in S[r])])-sum([W[j,k]for k in S[r] if(len(set(C[k]) & set(C[j]))==1 and k!=j and k not in S[s])])   
             if(len(stable_moves)>0):
                 delta_stable={}
                 for t in stable_moves:
@@ -179,21 +180,21 @@ def LSE_heuristic(nodes,edges,W,nc,p,banned_partitions):
                     delta[i,s,d]=0
         
         ## Swap movement
-        # d=3
-        # for i in nodes:
-        #     for j in nodes:
-        #         if(i<j):
-        #             for s in (set(C[i])-set(C[j])):
-        #                 for r in (set(C[j])-set(C[i])):
-        #                     S[s]=list(set(S[s]+[j])-{i})
-        #                     S[r]=list(set(S[r]+[i])-{j})
-        #                     move_stability=is_stable_partial(nodes,W,S,nc,s) and is_stable_partial(nodes,W,S,nc,r)
-        #                     S[s]=list(set(S[s]+[i])-{j})
-        #                     S[r]=list(set(S[r]+[j])-{i})
-        #                     if(move_stability):
-        #                         delta[i,s,j,r,d]=sum([W[i,k] for k in S[r] if(len(set(C[i]) & set(C[k]))==0 and k!=j)])+sum([W[j,k] for k in S[s] if(len(set(C[j]) & set(C[k]))==0 and k!=i)])-sum([W[i,k] for k in S[s] if(len(set(C[i]) & set(C[k]))==1 and k!=i and k not in S[r])])-sum([W[j,k]for k in S[r] if(len(set(C[k]) & set(C[j]))==1 and k!=j and k not in S[s])])   
-        #                     else:
-        #                         delta[i,s,j,r,d]=0
+        d=3
+        for i in nodes:
+            for j in nodes:
+                if(i<j):
+                    for s in (set(C[i])-set(C[j])):
+                        for r in (set(C[j])-set(C[i])):
+                            S[s]=list(set(S[s]+[j])-{i})
+                            S[r]=list(set(S[r]+[i])-{j})
+                            move_stability=is_stable_partial(nodes,W,S,nc,s) and is_stable_partial(nodes,W,S,nc,r)
+                            S[s]=list(set(S[s]+[i])-{j})
+                            S[r]=list(set(S[r]+[j])-{i})
+                            if(move_stability):
+                                delta[i,s,j,r,d]=sum([W[i,k] for k in S[r] if(len(set(C[i]) & set(C[k]))==0 and k!=j)])+sum([W[j,k] for k in S[s] if(len(set(C[j]) & set(C[k]))==0 and k!=i)])-sum([W[i,k] for k in S[s] if(len(set(C[i]) & set(C[k]))==1 and k!=i and k not in S[r])])-sum([W[j,k]for k in S[r] if(len(set(C[k]) & set(C[j]))==1 and k!=j and k not in S[s])])   
+                            else:
+                                delta[i,s,j,r,d]=0
 
 
         arg_max=max(delta, key=delta.get)
@@ -223,8 +224,6 @@ def LSE_heuristic(nodes,edges,W,nc,p,banned_partitions):
                 C[node1_max]=list(set(C[node1_max]+[com2_max])-{com1_max})
                 C[node2_max]=list(set(C[node2_max]+[com1_max])-{com2_max})
 
-    
-    #plt.savefig('heuristica1_football_lambda01.jpg')
     partition=[]
     for s in range(1,nc+1):
         if(len(S[s])>0):
