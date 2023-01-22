@@ -1,5 +1,5 @@
 import random
-from exact_formulations import find_stable_partition,F_ShMod,find_stable_partition3
+from exact_formulations import find_stable_partition
 
 ## Local stability exploration algorithm:
     ## W: Weights - Expected Weights
